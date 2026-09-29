@@ -113,6 +113,7 @@ export default function QueryPage() {
                <ResultItem label="授权主人" value={result.owner} />
                <ResultItem label="所属产品" value={result.product} />
                <ResultItem label="授权上级" value={result.upline} />
+               <ResultItem label="联系邮箱" value={result.contact_email || '未设置'} />
                <ResultItem label="开通时间" value={result.created_at} />
                <ResultItem label="授权有效期" value={result.expiration} />
             </div>

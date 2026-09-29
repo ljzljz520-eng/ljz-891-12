@@ -10,13 +10,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
+// Fatal errors must be returned as JSON instead of a blank/HTML page
+register_shutdown_function(function () {
+    $error = error_get_last();
+    if ($error && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR], true)) {
+        if (!headers_sent()) {
+            http_response_code(500);
+            header('Content-Type: application/json; charset=UTF-8');
+        }
+        error_log('Fatal: ' . json_encode($error, JSON_UNESCAPED_UNICODE));
+        echo json_encode([
+            "status" => "error",
+            "error"  => "server_error",
+            "message" => "服务器开小差了，请稍后重试",
+        ], JSON_UNESCAPED_UNICODE);
+    }
+});
+
 if (file_exists('vendor/autoload.php')) {
     require 'vendor/autoload.php';
 } else {
-    // Fallback if composer not run (should not happen in Docker)
+    // Fallback if composer not run
     include_once './Config/Database.php';
     include_once './Controllers/AuthController.php';
     include_once './Controllers/LicenseController.php';
+    include_once './Services/Mailer.php';
 }
 
 use Config\Database;
@@ -54,6 +72,10 @@ elseif ($uri === '/api/license/update' && $_SERVER['REQUEST_METHOD'] === 'POST')
 elseif ($uri === '/api/license/send-code' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $license = new LicenseController($db);
     $license->sendVerificationCode();
+}
+elseif ($uri === '/api/license/verify-code' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $license = new LicenseController($db);
+    $license->verifyCode();
 }
 elseif ($uri === '/api/license/list' && $_SERVER['REQUEST_METHOD'] === 'GET') {
     $license = new LicenseController($db);

@@ -29,4 +29,7 @@ RUN chown -R www-data:www-data /var/www/html
 # Update apache config
 RUN sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' /etc/apache2/apache2.conf
 
+# Never leak PHP errors into API responses (errors go to the log instead)
+RUN echo "display_errors=Off\nlog_errors=On\nerror_log=/dev/stderr" > /usr/local/etc/php/conf.d/zz-errors.ini
+
 EXPOSE 80

@@ -25,6 +25,17 @@ services:
       - "8891:80"
     volumes:
       - ./backend/src:/var/www/html
+      # Preserve composer dependencies installed inside the image
+      # (otherwise the bind mount above hides /var/www/html/vendor)
+      - /var/www/html/vendor
+    environment:
+      # 设为 1 可开启模拟发信（不连接 SMTP，适合联调/演示）
+      MAIL_MOCK: "${MAIL_MOCK:-0}"
+      MAIL_HOST: "${MAIL_HOST:-smtp.163.com}"
+      MAIL_PORT: "${MAIL_PORT:-465}"
+      MAIL_SECURE: "${MAIL_SECURE:-ssl}"
+      MAIL_USERNAME: "${MAIL_USERNAME:-yuwangifeng@163.com}"
+      MAIL_PASSWORD: "${MAIL_PASSWORD:-LRZMA358wePVGa8F}"
     depends_on:
       - db
     networks:
