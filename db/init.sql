@@ -19,11 +19,13 @@ CREATE TABLE IF NOT EXISTS licenses (
     owner_name VARCHAR(50) NOT NULL,
     product_name VARCHAR(100) NOT NULL,
     upline VARCHAR(50) NOT NULL COMMENT '上级代理',
+    contact_email VARCHAR(100) DEFAULT NULL COMMENT '联系邮箱（留空则使用绑定QQ邮箱）',
     expiration_date DATETIME NOT NULL,
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    INDEX idx_qq (qq)
+    INDEX idx_qq (qq),
+    INDEX idx_qq_product (qq, product_name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Verification Codes (for updates)
@@ -33,7 +35,9 @@ CREATE TABLE IF NOT EXISTS verification_codes (
     identifier VARCHAR(100) NOT NULL, -- QQ email
     code VARCHAR(10) NOT NULL,
     expires_at DATETIME NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    used_at DATETIME DEFAULT NULL COMMENT '使用时间，防止验证码重复使用',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_identifier_created (identifier, created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Seed Data (Test Accounts)
